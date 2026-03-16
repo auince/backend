@@ -39,8 +39,8 @@ async def enhance_image(request: EnhanceRequest):
             processor = EnhanceManager.get_deblur_denoiser()
             enhanced_np = processor.process(np_image)
 
-        elif method == "deblur":
-            processor = EnhanceManager.get_deblur_denoiser()
+        elif method == "deblur_gaussian":
+            processor = EnhanceManager.get_deblur_gaussian()
             enhanced_np = processor.process(np_image)
             
         elif method == "tiny_target_enhance":

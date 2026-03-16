@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 class EnhanceManager:
     _dehazer = None
     _deblur_denoiser = None
+    _deblur_gaussian = None
     _small_enhancer = None
 
     @classmethod
@@ -57,30 +58,31 @@ class EnhanceManager:
     @classmethod
     def get_deblur_denoiser(cls):
         if cls._deblur_denoiser is None:
+            # from enhanceScripts.deblur_gaussian import Sharpener
+            # deblur_method = settings.DEBLUR_METHOD if hasattr(settings, 'DEBLUR_METHOD') else 'unsharp'
+            # deblur_sigma = settings.DEBLUR_SIGMA if hasattr(settings, 'DEBLUR_SIGMA') else 1.2
+            # deblur_amount = settings.DEBLUR_AMOUNT if hasattr(settings, 'DEBLUR_AMOUNT') else 1.8
+            # cls._deblur_denoiser = Sharpener(method=deblur_method, sigma=deblur_sigma, amount=deblur_amount)
+            from enhanceScripts.deblur_denoise import RestormerPredictor
+            # 使用 config 中的路径，默认使用 deblur 路径
+            model_path = settings.MODEL_PATH_DEBLUR
+            # 注意：如果文件不存在，DeblurDenoiser 会抛出异常
+            # 我们在这里捕获它，或者让它抛出以便 load_all_models 记录日志
+            cls._deblur_denoiser = RestormerPredictor(model_path=model_path)
+        return cls._deblur_denoiser
+    @classmethod
+    def get_deblur_gaussian(cls):
+        if cls._deblur_gaussian is None:
             from enhanceScripts.deblur_gaussian import Sharpener
+            # 使用 config 中的路径，默认使用 deblur 路径
+            # 注意：如果文件不存在，DeblurDenoiser 会抛出异常
+            # 我们在这里捕获它，或者让它抛出以便 load_all_models 记录日志
             deblur_method = settings.DEBLUR_METHOD if hasattr(settings, 'DEBLUR_METHOD') else 'unsharp'
             deblur_sigma = settings.DEBLUR_SIGMA if hasattr(settings, 'DEBLUR_SIGMA') else 1.2
             deblur_amount = settings.DEBLUR_AMOUNT if hasattr(settings, 'DEBLUR_AMOUNT') else 1.8
-            cls._deblur_denoiser = Sharpener(method=deblur_method, sigma=deblur_sigma, amount=deblur_amount)
-            # from enhanceScripts.deblur_denoise import RestormerPredictor
-            # # 使用 config 中的路径，默认使用 deblur 路径
-            # model_path = settings.MODEL_PATH_DEBLUR
-            # # 注意：如果文件不存在，DeblurDenoiser 会抛出异常
-            # # 我们在这里捕获它，或者让它抛出以便 load_all_models 记录日志
-            # cls._deblur_denoiser = RestormerPredictor(model_path=model_path)
-        return cls._deblur_denoiser
-    # @classmethod
-    # def get_deblur_gaussian(cls):
-    #     if cls._deblur_denoiser is None:
-    #         from enhanceScripts.deblur_gaussian import Sharpener
-    #         # 使用 config 中的路径，默认使用 deblur 路径
-    #         # 注意：如果文件不存在，DeblurDenoiser 会抛出异常
-    #         # 我们在这里捕获它，或者让它抛出以便 load_all_models 记录日志
-    #         deblur_method = settings.DEBLUR_METHOD if hasattr(settings, 'DEBLUR_METHOD') else 'unsharp'
-    #         deblur_sigma = settings.DEBLUR_SIGMA if hasattr(settings, 'DEBLUR_SIGMA') else 1.2
-    #         deblur_amount = settings.DEBLUR_AMOUNT if hasattr(settings, 'DEBLUR_AMOUNT') else 1.8
-    #         cls._deblur_denoiser = Sharpener(method=deblur_method, sigma=deblur_sigma, amount=deblur_amount)
-    #     return cls._deblur_denoiser
+            cls._deblur_gaussian = Sharpener(method=deblur_method, sigma=deblur_sigma, amount=deblur_amount)
+            print(f"Initialized DeblurDenoiser with method={deblur_method}, sigma={deblur_sigma}, amount={deblur_amount}")
+        return cls._deblur_gaussian
     @classmethod
     def get_small_enhancer(cls):
         if cls._small_enhancer is None:
